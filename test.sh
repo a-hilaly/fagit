@@ -35,7 +35,7 @@ function __assert_tests_1 () {
     echo "end tests"
 }
 
-function __asert_tests_2 () {
+function __assert_tests_2 () {
   dir="$HOME/__test__"
   if [ -d "$dir" ]; then
       echo "[ OK ] ... test_make part clone successfull"
@@ -55,10 +55,12 @@ function __asert_tests_2 () {
 }
 
 function run_tests () {
+    echo 'Runing normal tests'
     __test_clone
     __test_build
     __assert_tests_1
     __clear_tests
+    echo 'Runing make tests'
     __test_make
     __assert_tests_2
     __clear_tests
