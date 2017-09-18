@@ -35,5 +35,7 @@ function __clear_tests () {
     rm -rf $dir
 }
 
+python3 babtu-sos-packaging.py --clone __test__
+
 __assert_tests
 __clear_tests
