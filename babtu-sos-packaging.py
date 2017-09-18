@@ -1,7 +1,7 @@
 import os
 import argparse
 
-DEFAULT = "{0}/Desktop".format(os.environ['HOME'])
+DEFAULT = "{0}".format(os.environ['HOME'])
 
 try:
     PRIVATE_OPT = True
