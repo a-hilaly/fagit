@@ -8,7 +8,7 @@ try:
     IALSOURCE = "github"
     _GIT_USER = os.environ['_GITHUB_USER_ID']
     _GIT_PW = os.environ['_GITHUB_PASS_WORD']
-    _ORGANISATION = ['_GITHUB_ORG']
+    _ORGANISATION = os.environ['_GITHUB_ORG']
 except:
     PRIVATE_OPT = False
     _ORGANISATION = "iallabs"
@@ -20,11 +20,11 @@ class WrongConfiguration(Exception):
     pass
 
 def _make_url_from(organisation=None, repo=None, private=False):
-    if PRIVATE_OPT and private:
+    if not(PRIVATE_OPT) and private:
         msg = "You need to set GITHUB Logs at bash env"
         raise GitHubLogsMissing(msg)
-    url_with_logs = "https://{0}:{1}@github.com/{2}/{3}.git"
-    simple_url = "https://github.com/{0}/{1}.git"
+    url_with_logs = "https://{0}:{1}@github.com/{2}/{3}"
+    simple_url = "https://github.com/{0}/{1}"
     if private:
         return url_with_logs.format(_GIT_USER, _GIT_PW, organisation, repo)
     return simple_url.format(organisation, repo)
@@ -42,12 +42,13 @@ def clone_package(repo, organisation=_ORGANISATION, private=False, directory=DEF
     return x
 
 def build_package(repo, build_option=None, directory=DEFAULT, verbose=False):
-    build = "{0}/{1}/build.sh".format(DEFAULT, repo)
-    os.chdir(directory)
+    repo_dir = "{0}/{1}".format(directory, repo)
+    build = "{0}/build.sh".format(repo_dir)
+    os.chdir(repo_dir)
     if build_option:
-        cmd = "bash {0} --build {1}".format(build, build_option)
+        cmd = "bash {0} --build --{1}".format(build, build_option)
     else:
-        cmd = "bash {0} --build".format(path)
+        cmd = "bash {0} --build".format(build)
     x = os.system(cmd)
     if verbose:
         print('[ I ] ... Build command completed with exit status {0}'.format(x))
@@ -62,7 +63,7 @@ def _parse_cfg_file(directory, f):
 
 def __make_babtu_cfg(directory, target_dir=DEFAULT, verbose=False):
     data = _parse_cfg_file(directory, 'babtu.cfg')
-    assert data['sos-packages']['org'] = _ORGANISATION
+    assert data['sos-packages']['org'] == _ORGANISATION
     for package in list(data.keys())[1::]:
         build_opt = data[package]['build']
         _private = (data[package]['private'] == 'true')
