@@ -9,7 +9,7 @@ function __test_build () {
 
 function __assert_tests () {
     __test_clone
-    dir="$HOME/Desktop/__test__"
+    dir="$HOME/__test__"
     echo $dir
     if [ -d "$dir" ]; then
         echo "[ OK ] ... test_clone successfull"
@@ -31,11 +31,9 @@ function __assert_tests () {
 }
 
 function __clear_tests () {
-    dir="$HOME/Desktop/__test__"
+    dir="$HOME/__test__"
     rm -rf $dir
 }
-
-python3 babtu-sos-packaging.py --clone __test__
 
 __assert_tests
 __clear_tests
