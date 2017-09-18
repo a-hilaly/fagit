@@ -15,4 +15,3 @@ jobs:
           name: run tests
           command: |
             bash test.sh
-            
