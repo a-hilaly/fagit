@@ -15,7 +15,7 @@ function __assert_tests () {
     else
         echo "[WARN] ... test_clone failed"
         echo "Exiting tests ..."
-        return 1
+        exit 1
     fi
     __test_build
     file="$dir/output"
@@ -24,7 +24,7 @@ function __assert_tests () {
         return 0
     else
         echo "[WARN] ... test_build failed"
-        return 1
+        exit 1
     fi
     echo "end tests"
 }
