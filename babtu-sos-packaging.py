@@ -6,7 +6,7 @@ DEFAULT = "{0}".format(os.environ['HOME'])
 try:
     PRIVATE_OPT = True
     IALSOURCE = "github"
-    _GIT_USER = os.environ['_GITHSER_ID']
+    _GIT_USER = os.environ['_GITHUB_USER_ID']
     _GIT_PW = os.environ['_GITHUB_PASS_WORD']
     _ORGANISATION = os.environ['_GITHUB_ORG']
 except:
