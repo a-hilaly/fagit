@@ -4,4 +4,4 @@
 #
 #
 #
-python3 babtu-sos-packaging.py "$@"
+python3 ial-pkg-sos.py "$@"

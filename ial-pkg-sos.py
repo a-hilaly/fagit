@@ -79,9 +79,6 @@ def __make_babtu_cfg(directory, target_dir=DEFAULT, verbose=False):
                       build_option=build_opt,
                       directory=target_dir)
 
-
-
-
 if __name__ == "__main__":
 
     assert __git_version() == 0
