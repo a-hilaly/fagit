@@ -1,16 +1,15 @@
 #!/bin/bash
 
 function __test_clone () {
-    bash run.sh --clone __test__
+    bash run.sh --clone __test__ -p
 }
 function __test_build () {
-    bash run.sh --build __test__
+    bash run.sh --build __test__ -p
 }
 
 function __assert_tests () {
     __test_clone
     dir="$HOME/__test__"
-    echo $dir
     if [ -d "$dir" ]; then
         echo "[ OK ] ... test_clone successfull"
     else

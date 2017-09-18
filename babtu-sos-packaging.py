@@ -19,6 +19,8 @@ class GitHubLogsMissing(Exception):
 class WrongConfiguration(Exception):
     pass
 
+print(_GIT_USER, "koekzoez")
+
 def _make_url_from(organisation=None, repo=None, private=False):
     if not(PRIVATE_OPT) and private:
         msg = "You need to set GITHUB Logs at bash env"
