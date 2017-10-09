@@ -1,38 +1,65 @@
 import os
 import argparse
 
-DEFAULT = "{0}".format(os.environ['HOME'])
+PRIVATE_OPT = True
+SOURCE = "github"
 
-try:
-    PRIVATE_OPT = True
-    IALSOURCE = "github"
-    _GIT_USER = os.environ['_GITHUB_USER_ID']
-    _GIT_PW = os.environ['_GITHUB_PASS_WORD']
-    _ORGANISATION = os.environ['_GITHUB_ORG']
-except:
-    PRIVATE_OPT = False
-    _ORGANISATION = "iallabs"
+
+class GitDown(object):
+
+
+    def __init__(self):
+        try:
+            self.user = os.environ['_GITHUB_ID']
+            _GIT_PW = os.environ['_GITHUB_PASSWORD']
+            _ORGANISATION = os.environ['_GITHUB_ORG']
+        except:
+            PRIVATE_OPT = False
+            _ORGANISATION = ""
+
+
+    @classmethod
+    def clone_project(cls):
+        pass
+
+
+    @classmethod
+    def build_project(cls):
+        pass
+
+
+    @classmethod
+    def make_project(cls):
+        pass
+
 
 class GitHubLogsMissing(Exception):
     pass
 
+
 class WrongConfiguration(Exception):
     pass
 
+
 def _make_url_from(organisation=None, repo=None, private=False):
+    """
+    Costum url from organisation repository name
+    Uses Github logs if private repository
+    """
     if not(PRIVATE_OPT) and private:
         msg = "You need to set GITHUB Logs at bash env"
         raise GitHubLogsMissing(msg)
     url_with_logs = "https://{0}:{1}@github.com/{2}/{3}"
     simple_url = "https://github.com/{0}/{1}"
     if private:
-        return url_with_logs.format(_GIT_USER, _GIT_PW, organisation, repo)
+        #NOTE: FIXME: XXX
+        return url_with_logs.format(X, _GIT_PW, organisation, repo)
     return simple_url.format(organisation, repo)
 
 def __git_version():
     return os.system('git version')
 
-def clone_package(repo, organisation=_ORGANISATION, private=False, directory=DEFAULT, verbose=False):
+def clone_package(repo, organisation=None, private=False, directory=None, verbose=False):
     cmd = "cd {0} && git clone {1}".format(directory, _make_url_from(organisation=organisation,
                                                                      repo=repo,
                                                                      private=private))
@@ -41,7 +68,7 @@ def clone_package(repo, organisation=_ORGANISATION, private=False, directory=DEF
         print('[ I ] ... Clone command completed with exit status {0}'.format(x))
     return x
 
-def build_package(repo, build_option=None, directory=DEFAULT, verbose=False):
+def build_package(repo, build_option=None, directory=None, verbose=False):
     repo_dir = "{0}/{1}".format(directory, repo)
     build = "{0}/build.sh".format(repo_dir)
     os.chdir(repo_dir)
