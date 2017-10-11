@@ -6,8 +6,8 @@ HOME = os.environ["HOME"]
 conf_file_path = ''.join(
     os.path.abspath(os.path.dirname(__file__)).split('/')[:-1]
 )
-COLLECT_MODE = "conf"
 
+configuration = configparser.ConfigParser().read(conf_file_path)
 
 ##@@ SUBPROCESS UTILS
 
@@ -28,7 +28,7 @@ def _subprocess_call_with_communicate(cmd):
 
 ##@@
 
-##@@ EXPECTED ERROR
+##@@ EXCEPTIONS
 
 class GitCliMissing(Exception):
     pass
@@ -37,6 +37,9 @@ class GitHubLogsMissing(Exception):
     pass
 
 class CloneError(Exception):
+    pass
+
+class UnknownConfiguration(Exception):
     pass
 
 
@@ -61,14 +64,27 @@ class FaGit(object):
         else:
             print('[ OK ] ... Git clone finished successfully ')
 
+    @staticmethod
+    def __reconfigure(**kwargs):
+        for k in list(kwargs.keys()):
+            if not k in ['source', 'dir', 'user', 'password']:
+                raise UnknownConfiguration("Conf : {0}".format(k))
+        import configparser
+        conf = configparser.ConfigParser()
+        conf['DEFAULT'] = kwargs
+        f = open(conf_file_path, 'w')
+        f.write(conf)
+        f.close()
+
     def __init__(self):
         self.user = None
         self.password = None
 
     def collect(self):
-        if COLLECT_MODE == "conf":
+        mode = configuration['source']
+        if mode == "conf":
             self.collect_from_conf()
-        else:
+        elif mode == "env":
             self.collect_from_env()
 
     def collect_from_env(self):
@@ -76,9 +92,7 @@ class FaGit(object):
         self.password = os.environ['GITHUB_PASSWORD']
 
     def collect_from_conf(self):
-        c = configparser.ConfigParser()
-        c.read(conf_file_path)
-        self.user, self.password = list(c['github.logs'].values())
+        self.user, self.password = list(configuration['github.logs'].values())
 
     def get_project(self, project, source, private=False, directory=None):
         if private:
