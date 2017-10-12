@@ -10,8 +10,14 @@ jobs:
 
     steps:
       - checkout
+      # setup
+      - run:
+        name : setup
+        command: |
+          sudo python setup.py install
+
       # run tests!
       - run:
           name: run tests
           command: |
-            bash test.sh
+            python setup.py test

@@ -2,8 +2,6 @@
 from setuptools import setup, find_packages, Command
 #
 class test(Command):
-    """Runs all "PYTHON" tests under the greww/folder
-    """
 
     description = "run all tests"
     user_options = []  # distutils complains if this is not here.
@@ -29,13 +27,16 @@ with open('LICENSE') as f:
 """
 
 setup(
-    name='FaGit',
-    version='0.0.1',
+    name='fagit',
+    version='0.0.2',
     description='fagit',
     long_description=readme,
     author='hilaly mohammed-amine',
     author_email='hilalyamine@gmail.com',
     cmdclass={'test' : test},
-    py_modules=['fagit'],
+    packages=find_packages(exclude=('tests', 'docs', '.circleci')),
     scripts=['bin/fagit'],
+    package_data={'fagit': ['conf/conf.ini']},
+    include_package_data=True,
+    zip_safe=False,
 )

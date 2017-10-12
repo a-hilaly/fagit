@@ -1,13 +1,17 @@
+import sys
 import os
 import configparser
 import subprocess
 
 HOME = os.environ["HOME"]
-conf_file_path = ''.join(
-    os.path.abspath(os.path.dirname(__file__)).split('/')[:-1]
-)
+conf_file_path = (os.path.abspath(os.path.dirname(__file__)
+                                 )) + '/conf/conf.ini'
 
-configuration = configparser.ConfigParser().read(conf_file_path)
+print(conf_file_path)
+
+c = configparser.ConfigParser()
+c.read(conf_file_path)
+configuration=c["DEFAULT"]
 
 ##@@ SUBPROCESS UTILS
 
@@ -24,7 +28,7 @@ def _subprocess_call_with_communicate(cmd):
     c = cmd.split(' ')
     p = subprocess.Popen(c, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, stderr = p.communicate()
-    return _cbtr(stdout), _cbtr(stderr)
+    return _cbtr(stdout), _cbtr(stderr), p.returncode
 
 ##@@
 
@@ -46,26 +50,26 @@ class UnknownConfiguration(Exception):
 class FaGit(object):
 
     @staticmethod
-    def __assert_git():
-        out, err = _subprocess_call_with_communicate('git --version')
-        if err:
+    def __assert_git(verbose=False):
+        out, err, exit = _subprocess_call_with_communicate('git --version')
+        if exit:
             raise GitCliMissing(err)
-        print('[ OK ] ... Git checked')
-        return True
+        if verbose:
+            print('[ OK ] ... Git checked')
 
     @staticmethod
-    def __git_clone(url, at_dir=None):
+    def __git_clone(url, at_dir=None, verbose=False):
         cmd = "git clone {0}".format(url)
         if at_dir:
             cmd += " {0}".format(at_dir)
-        out, err = _subprocess_call_with_communicate(cmd)
-        if err:
+        if verbose:
+            print('[ OK ] ... Cloning {0} into {1}'.format(url, at_dir))
+        out, err, exit= _subprocess_call_with_communicate(cmd)
+        if exit:
             raise CloneError(err)
-        else:
-            print('[ OK ] ... Git clone finished successfully ')
 
     @staticmethod
-    def __reconfigure(**kwargs):
+    def __configure(verbose=False, **kwargs):
         for k in list(kwargs.keys()):
             if not k in ['source', 'dir', 'user', 'password']:
                 raise UnknownConfiguration("Conf : {0}".format(k))
@@ -73,39 +77,72 @@ class FaGit(object):
         conf = configparser.ConfigParser()
         conf['DEFAULT'] = kwargs
         f = open(conf_file_path, 'w')
-        f.write(conf)
+        conf.write(f)
         f.close()
 
     def __init__(self):
         self.user = None
         self.password = None
+        self.default_directory = None
+        self.default_source = None
 
-    def collect(self):
-        mode = configuration['source']
+    def _collect(self, verbose=False):
+        mode = configuration['collectmode']
         if mode == "conf":
-            self.collect_from_conf()
+            self.user = configuration["user"]
+            self.password = configuration ["password"]
+            if verbose:
+                print('[ OK ] ... collected ids from configuration file')
         elif mode == "env":
-            self.collect_from_env()
+            self.user = os.environ['GITHUB_ID']
+            self.password = os.environ['GITHUB_PASSWORD']
+            if verbose:
+                print('[ OK ] ... collected ids from envirenement')
+        self.default_directory = configuration['dir']
+        self.default_source = configuration['source']
 
-    def collect_from_env(self):
-        self.user = os.environ['GITHUB_ID']
-        self.password = os.environ['GITHUB_PASSWORD']
 
-    def collect_from_conf(self):
-        self.user, self.password = list(configuration['github.logs'].values())
-
-    def get_project(self, project, source, private=False, directory=None):
+    def get_project(self, project, source=None,
+                    private=False, directory=None, verbose=False):
+        if not source:
+            source = self.default_source
+        if not directory:
+            directory = self.default_directory
         if private:
             url = "https://{0}:{1}@github.com/{2}/{3}.git".format(
-                self.user, self.password, project, source
+                self.user, self.password, source, project
             )
         else:
-            url = "https://github.com/{0}/{1}.git".format(project, source)
-        self.__git_clone(url, at_dir=directory)
+            url = "https://github.com/{0}/{1}.git".format(source, project)
+        self.__assert_git(verbose=verbose)
+        self.__git_clone(url, at_dir=directory, verbose=verbose)
+        if verbose:
+            print("[ OK ] ... Cloned successfully {0} at {1}".format(project,
+                                                                     directory))
+
+    def build_project(self):
+        """
+        Not Implemented
+        """
+        pass
 
     @classmethod
-    def clone(cls, *args, **kwargs):
+    def clone(cls, *args, verbose=False, **kwargs):
         obj = object.__new__(cls)
         obj.__init__()
-        obj.collect()
-        obj.get_project(*args, **kwargs)
+        obj._collect(verbose=verbose)
+        obj.get_project(*args, **kwargs, verbose=verbose)
+
+    @classmethod
+    def configure(cls, **kwargs):
+        """
+        Not Implemented
+        """
+        pass
+
+    @classmethod
+    def build(cls, *args, **kwargs):
+        """
+        Not Impelemnted
+        """
+        pass
